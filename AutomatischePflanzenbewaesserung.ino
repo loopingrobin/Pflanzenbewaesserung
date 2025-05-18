@@ -15,6 +15,7 @@ const int buttonDisplay = 8;
 const int buttonUp = 9;
 const int buttonDown = 10;
 const int buttonSelect = 11;
+const int buttonTest = 7;
 
 // Objekte
 MoistureSensor sensor1(A0);
@@ -76,7 +77,9 @@ void testPumps() {
     pump1.start(1);
     delay(2000);
     pump2.start(1);
-    delay(5000);
+    delay(2000);
+    pump3.start(1);
+    delay(2000);
 }
 
 void testDisplay() {
@@ -107,6 +110,9 @@ void setup() {
     pinMode(buttonUp, INPUT_PULLUP);
     pinMode(buttonDown, INPUT_PULLUP);
     pinMode(buttonSelect, INPUT_PULLUP);
+    pinMode(buttonTest, INPUT_PULLUP);
+
+    pinMode(LED_BUILTIN, OUTPUT);
 
     climate.begin();
     screen.begin();
@@ -117,6 +123,9 @@ void setup() {
     EEPROM.get(12, pumpDuration1);
     EEPROM.get(16, pumpDuration2);
     EEPROM.get(20, pumpDuration3);
+
+    Serial.begin(9600);
+    Serial.println("Programm startet");
 }
 
 void loop() {
@@ -130,7 +139,8 @@ void loop() {
         default: break;
     }
 
-    if (millis() - lastCheck > 120000) { // alle 2 Minuten
+    // if (millis() - lastCheck > 120000) { // alle 2 Minuten
+    if (millis() - lastCheck > 30000) { // alle 2 Minuten
         lastCheck = millis();
         checkMoistureLevels();
     }
@@ -144,12 +154,23 @@ void loop() {
 }
 
 void checkMoistureLevels() {
+    Serial.println("Check Moisture Levels");
     int m1 = sensor1.read();
     int m2 = sensor2.read();
     int m3 = sensor3.read();
-    if (m1 < threshold1 && !pump1.isRunning()) pump1.start(pumpDuration1);
-    if (m2 < threshold2 && !pump2.isRunning()) pump2.start(pumpDuration2);
-    if (m3 < threshold3 && !pump3.isRunning()) pump3.start(pumpDuration3);
+    Serial.print("Sensor: ");
+    Serial.println(m1);
+    Serial.print("Grenze: ");
+    Serial.println(threshold1);
+    Serial.print("Pumpe: ");
+    if (pump1.isRunning()) Serial.println(" true ");
+    else Serial.println(" false ");
+    if (m1 > threshold1 && !pump1.isRunning()) {
+        Serial.println("Pump 1 started");
+        pump1.start(pumpDuration1);
+    }
+    if (m2 > threshold2 && !pump2.isRunning()) pump2.start(pumpDuration2);
+    if (m3 > threshold3 && !pump3.isRunning()) pump3.start(pumpDuration3);
 }
 
 void handleDisplay() {
@@ -192,6 +213,12 @@ void handleButtons() {
             calibrateMode = false;
         }
         displayTimeout = millis();
+        lastButtonPress = millis();
+    }
+    if (digitalRead(buttonTest) == LOW) {
+        digitalWrite(LED_BUILTIN, HIGH);
+        testPumps();
+        digitalWrite(LED_BUILTIN, LOW);
         lastButtonPress = millis();
     }
 }
