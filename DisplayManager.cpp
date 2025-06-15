@@ -10,35 +10,58 @@ void DisplayManager::begin() {
     display.clearDisplay();
 }
 
-void DisplayManager::showMenu(int t1, int d1, int t2, int d2, int t3, int d3, int index) {
+void DisplayManager::showMenu(PlantUnit* plants[], int count, int index) {
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(WHITE);
-    display.setCursor(0, 0);
-    display.print("T1:"); display.print(t1); display.print(" D1:"); display.print(d1);
-    display.setCursor(0, 10);
-    display.print("T2:"); display.print(t2); display.print(" D2:"); display.print(d2);
-    display.setCursor(0, 20);
-    display.print("T3:"); display.print(t3); display.print(" D3:"); display.print(d3);
+    for (int i = 0; i < count; i++) {
+        display.setCursor(0, i * 10);
+        display.print("T"); display.print(i+1); display.print(":");
+        display.print(plants[i]->threshold);
+        display.print(" D"); display.print(i+1); display.print(":");
+        display.print(plants[i]->duration);
+        display.print(plants[i]->active ? " A" : " I");
+    }
     display.setCursor(90, 20);
-    const char* items[] = {"T1", "D1", "T2", "D2", "T3", "D3"};
-    display.print(items[index]);
+    display.print("E:"); display.print(index);
     display.display();
 }
 
-void DisplayManager::showInfo(int m1, int m2, int m3, float temp, float hum) {
+void DisplayManager::showInfo(PlantUnit* plants[], int count, float temp, float hum) {
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(WHITE);
-    display.setCursor(0, 0);
-    display.print("F1:"); display.print(m1); display.print(" F2:"); display.print(m2);
-    display.setCursor(0, 10);
-    display.print("F3:"); display.print(m3);
-    display.setCursor(64, 10);
-    display.print("T:"); display.print(temp, 1); display.print("C");
-    display.setCursor(0, 20);
-    display.print("H:"); display.print(hum, 1); display.print("%");
+
+    // DHT11 Werte immer oben
+    display.setCursor(0,0);
+    display.print(F("Temp: "));
+    display.print(temp);
+    display.print(F(" C"));
+    display.setCursor(0,10);
+    display.print(F("Humidity: "));
+    display.print(hum);
+    display.print(F(" %"));
+
+    // 2 Pflanzen pro Seite anzeigen
+    int start = infoPage * 2;
+    int end = start + 2;
+    int y = 20;
+
+    for (int i = start; i < end && i < count; i++) {
+      display.setCursor(0, y);
+      display.print(F("Plant "));
+      display.print(i+1);
+      display.print(F(": "));
+      display.print(plants[i]->getMoisture());
+      y += 10;
+    }
+
     display.display();
+}
+
+void DisplayManager::nextInfoPage(int plantCount) {
+    int maxPage = (plantCount + 1) / 2 - 1; // 2 Pflanzen pro Seite
+    infoPage = (infoPage >= maxPage) ? 0 : infoPage + 1;
 }
 
 void DisplayManager::clear() {

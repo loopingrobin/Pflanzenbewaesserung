@@ -3,13 +3,17 @@
 
 #include <Arduino.h>
 #include <Adafruit_SSD1306.h>
+#include "PlantUnit.h"
 
 class DisplayManager {
 public:
+    int infoPage = 0;   // aktuelle Info-Seite
+
     DisplayManager();
     void begin();
-    void showMenu(int t1, int d1, int t2, int d2, int t3, int d3, int index);
-    void showInfo(int m1, int m2, int m3, float temp, float hum);
+    void showMenu(PlantUnit* plants[], int count, int index);
+    void showInfo(PlantUnit* plants[], int count, float temp, float hum);
+    void nextInfoPage(int plantCount);
     void clear();
 
 private:
