@@ -10,20 +10,43 @@ void DisplayManager::begin() {
     display.clearDisplay();
 }
 
-void DisplayManager::showMenu(PlantUnit* plants[], int count, int index) {
+void DisplayManager::clear() {
+    display.clearDisplay();
+    display.display();
+}
+
+void DisplayManager::showMenu(PlantUnit* plants[], int count, int menuIndex) {
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(WHITE);
-    for (int i = 0; i < count; i++) {
-        display.setCursor(0, i * 10);
-        display.print("T"); display.print(i+1); display.print(":");
-        display.print(plants[i]->threshold);
-        display.print(" D"); display.print(i+1); display.print(":");
-        display.print(plants[i]->duration);
-        display.print(plants[i]->active ? " A" : " I");
-    }
-    display.setCursor(90, 20);
-    display.print("E:"); display.print(index);
+
+    int plantIndex = menuIndex / 4;
+    int paramIndex = menuIndex % 4;
+    PlantUnit* p = plants[plantIndex];
+
+    display.setCursor(0, 0);
+    display.print("Pflanze "); display.print(plantIndex + 1);
+
+    display.setCursor(0, 10);
+    display.print("Sch: ");
+    display.print(p->threshold);
+    if (paramIndex == 0) display.print(" <");
+
+    display.setCursor(0, 20);
+    display.print("Dau: ");
+    display.print(p->duration);
+    if (paramIndex == 2) display.print(" <");
+
+    display.setCursor(64, 10);
+    // display.print("Tri: ");
+    display.print(p->triggerAbove ? ">" : "<");
+    if (paramIndex == 1) display.print(" <");
+
+    display.setCursor(64, 20);
+    // display.print("Akt: ");
+    display.print(p->active ? "Aktiv" : "Aus");
+    if (paramIndex == 3) display.print(" <");
+
     display.display();
 }
 
@@ -32,39 +55,23 @@ void DisplayManager::showInfo(PlantUnit* plants[], int count, float temp, float 
     display.setTextSize(1);
     display.setTextColor(WHITE);
 
-    // DHT11 Werte immer oben
-    display.setCursor(0,0);
-    display.print(F("Temp: "));
-    display.print(temp);
-    display.print(F(" C"));
-    display.setCursor(0,10);
-    display.print(F("Humidity: "));
-    display.print(hum);
-    display.print(F(" %"));
-
-    // 2 Pflanzen pro Seite anzeigen
-    int start = infoPage * 2;
-    int end = start + 2;
-    int y = 20;
-
-    for (int i = start; i < end && i < count; i++) {
-      display.setCursor(0, y);
-      display.print(F("Plant "));
-      display.print(i+1);
-      display.print(F(": "));
-      display.print(plants[i]->getMoisture());
-      y += 10;
+    if (count >= 2) {
+        display.setCursor(0, 0);
+        display.print("F1:"); display.print(plants[0]->getMoisture());
+        if (plants[1]->active) { display.print(" F2:"); display.print(plants[1]->getMoisture()); }
     }
+    if (count >= 4) {
+        display.setCursor(0, 10);
+        if (plants[2]->active) { display.print("F3:"); display.print(plants[2]->getMoisture()); }
+        if (plants[3]->active) { display.print(" F4:"); display.print(plants[3]->getMoisture()); }
+    }
+    display.setCursor(0, 20);
+    display.print("T:"); display.print(temp, 1); display.print("C ");
+    display.print("H:"); display.print(hum, 0); display.print("%");
 
     display.display();
 }
 
 void DisplayManager::nextInfoPage(int plantCount) {
-    int maxPage = (plantCount + 1) / 2 - 1; // 2 Pflanzen pro Seite
-    infoPage = (infoPage >= maxPage) ? 0 : infoPage + 1;
-}
-
-void DisplayManager::clear() {
-    display.clearDisplay();
-    display.display();
+    infoPage = (infoPage >= plantCount) ? 0 : infoPage + 1;
 }

@@ -55,7 +55,8 @@ void loop() {
         lastCheck = millis();
         for (auto plant : plants) plant->checkAndWater();
     }
-
+    
+    for (auto plant : plants) plant->update();
     handleDisplay();
     handleButtons();
 }
@@ -87,15 +88,15 @@ void handleDisplay() {
 void handleButtons() {
     if (millis() - lastButtonPress < debounceDelay) return;
 
-    if (digitalRead(buttonNext) == LOW) {
-        screen.nextInfoPage(sizeof(plants)); 
-    }
+    // if (digitalRead(buttonNext) == LOW) {
+    //     screen.nextInfoPage(sizeof(plants)); 
+    // }
     if (digitalRead(buttonUp) == LOW) {
         int plantIndex = menuIndex / 4;
         int paramIndex = menuIndex % 4;
         if (paramIndex == 0) plants[plantIndex]->threshold += 10;
-        if (paramIndex == 1) plants[plantIndex]->duration += 1;
-        if (paramIndex == 2) plants[plantIndex]->triggerAbove = !plants[plantIndex]->triggerAbove;
+        if (paramIndex == 1) plants[plantIndex]->triggerAbove = !plants[plantIndex]->triggerAbove;
+        if (paramIndex == 2) plants[plantIndex]->duration += 1;
         if (paramIndex == 3) plants[plantIndex]->active = !plants[plantIndex]->active;
         plants[plantIndex]->saveSettings();
         displayTimeout = millis();
@@ -105,8 +106,8 @@ void handleButtons() {
         int plantIndex = menuIndex / 4;
         int paramIndex = menuIndex % 4;
         if (paramIndex == 0) plants[plantIndex]->threshold -= 10;
-        if (paramIndex == 1 && plants[plantIndex]->duration > 1) plants[plantIndex]->duration -= 1;
-        if (paramIndex == 2) plants[plantIndex]->triggerAbove = !plants[plantIndex]->triggerAbove;
+        if (paramIndex == 1) plants[plantIndex]->triggerAbove = !plants[plantIndex]->triggerAbove;
+        if (paramIndex == 2 && plants[plantIndex]->duration > 1) plants[plantIndex]->duration -= 1;
         if (paramIndex == 3) plants[plantIndex]->active = !plants[plantIndex]->active;
         plants[plantIndex]->saveSettings();
         displayTimeout = millis();

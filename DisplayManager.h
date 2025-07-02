@@ -11,10 +11,10 @@ public:
 
     DisplayManager();
     void begin();
+    void clear();
     void showMenu(PlantUnit* plants[], int count, int index);
     void showInfo(PlantUnit* plants[], int count, float temp, float hum);
     void nextInfoPage(int plantCount);
-    void clear();
 
 private:
     Adafruit_SSD1306 display;

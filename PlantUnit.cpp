@@ -11,10 +11,10 @@ void PlantUnit::begin() {
 }
 
 void PlantUnit::saveSettings() {
-    EEPROM.put(eepromBase + 0, threshold);
-    EEPROM.put(eepromBase + 4, duration);
-    EEPROM.put(eepromBase + 8, triggerAbove);
-    EEPROM.put(eepromBase + 9, active);
+    EEPROM.update(eepromBase + 0, threshold);
+    EEPROM.update(eepromBase + 4, duration);
+    EEPROM.update(eepromBase + 8, triggerAbove);
+    EEPROM.update(eepromBase + 9, active);
 }
 
 void PlantUnit::update() {
